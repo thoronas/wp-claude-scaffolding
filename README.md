@@ -45,7 +45,11 @@ ls ~/.claude/skills/
 # should show: wp-block  wp-debug  wp-feature  wp-migrate  wp-review
 ```
 
-### Step 2 — New project setup (per project)
+### Step 2 — Project setup
+
+There are two paths depending on whether you're starting fresh or dropping into an existing repo.
+
+#### New project
 
 Copy the `project/` directory into your new repo:
 
@@ -66,6 +70,32 @@ Then complete the rename checklist:
 - [ ] `.wp-env.json` — update theme and plugin directory names
 - [ ] Run `composer install`
 - [ ] Open Claude Code in the project directory
+
+#### Existing project
+
+You don't need the full `project/` directory. Drop in only the Claude layer — these are the files Claude reads to understand your project and enforce standards:
+
+| File | What it does | Commit it? |
+| --- | --- | --- |
+| `CLAUDE.md` | Project memory loaded every session — conventions, commands, current focus | Yes |
+| `PROJECT-SPEC.md` | Feature specs and data model — referenced on demand | Yes |
+| `DECISIONS.md` | Architecture decision log — prevents Claude from undoing deliberate choices | Yes |
+| `.claude/settings.json` | Scopes Claude's read/write permissions to your project's directories | Yes |
+| `.claude/reference/` | Inspiration code, mockups, API samples for Claude to reference | Yes (except `reference/local/`) |
+
+**Minimum viable drop-in** (if you want nothing else):
+
+```bash
+cp project/CLAUDE.md /path/to/existing-project/
+cp project/PROJECT-SPEC.md /path/to/existing-project/
+cp project/DECISIONS.md /path/to/existing-project/
+mkdir -p /path/to/existing-project/.claude
+cp project/.claude/settings.json /path/to/existing-project/.claude/
+```
+
+Then update `CLAUDE.md` to match your project's actual structure, commands, and conventions — and update `.claude/settings.json` permission globs to match your directory layout. Claude reads both files automatically at the start of every session.
+
+**What you do NOT need to copy** into an existing project: `themes/`, `plugins/`, `composer.json`, `phpcs.xml.dist`, or any other config files you already have. The skills, agents, and rules are global (installed in Step 1) and work automatically — they never live in the project repo.
 
 ---
 
