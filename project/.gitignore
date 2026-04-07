@@ -1,0 +1,37 @@
+# Dependencies
+vendor/
+node_modules/
+
+# Build output
+build/
+dist/
+
+# WordPress core and third-party
+wp-content/uploads/
+wp-content/upgrade/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment and secrets
+.env
+.env.*
+wp-config.php
+
+# Claude Code — project-level config
+# .claude/settings.json is committed (shared permissions)
+# .claude/reference/ is committed (shared reference material)
+# skills/, agents/, rules/ are NOT present here — they live in ~/.claude/ (see Obsidian vault)
+.claude/reference/local/
+.claude/settings.local.json
+
+# Logs
+*.log
+debug.log

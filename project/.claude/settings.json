@@ -1,0 +1,45 @@
+{
+    "$schema": "https://json.schemastore.org/claude-code-settings.json",
+    "permissions": {
+        "allow": [
+            "Read(themes/**)",
+            "Read(plugins/**)",
+            "Read(mu-plugins/**)",
+            "Read(tests/**)",
+            "Read(composer.json)",
+            "Read(package.json)",
+            "Read(phpcs.xml.dist)",
+            "Read(phpunit.xml.dist)",
+            "Read(.editorconfig)",
+            "Read(PROJECT-SPEC.md)",
+            "Read(DECISIONS.md)",
+            "Read(.claude/reference/**)",
+            "Write(themes/**)",
+            "Write(plugins/**)",
+            "Write(mu-plugins/**)",
+            "Write(tests/**)",
+            "Bash(composer phpcs)",
+            "Bash(composer phpcs -- *)",
+            "Bash(composer phpcbf)",
+            "Bash(composer phpcbf -- *)",
+            "Bash(composer test)",
+            "Bash(composer test -- *)",
+            "Bash(npm run build)",
+            "Bash(npm run start)",
+            "Bash(npm run lint)",
+            "Bash(npx wp-env *)"
+        ],
+        "deny": [
+            "Read(.env)",
+            "Read(.env.*)",
+            "Read(**/wp-config.php)",
+            "Read(**/credentials*)",
+            "Read(**/secrets*)",
+            "Bash(rm -rf *)",
+            "Bash(curl *)",
+            "Bash(wget *)",
+            "Bash(ssh *)",
+            "Bash(scp *)"
+        ]
+    }
+}

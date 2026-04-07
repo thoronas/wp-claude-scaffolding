@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<ruleset name="Project Standards">
+    <description>WordPress Coding Standards for this project.</description>
+
+    <file>./themes</file>
+    <file>./plugins</file>
+    <file>./mu-plugins</file>
+    <file>./tests</file>
+
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/build/*</exclude-pattern>
+    <exclude-pattern>*/dist/*</exclude-pattern>
+
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
+    <arg value="sp"/>
+
+    <rule ref="WordPress-Extra">
+        <!-- Customize rule exclusions here if needed -->
+    </rule>
+
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <!--
+                Add all text domains used in this project.
+                One element per theme/plugin text domain.
+            -->
+            <property name="text_domain" type="array">
+                <element value="your-theme"/>
+                <element value="your-plugin"/>
+            </property>
+        </properties>
+    </rule>
+
+    <config name="minimum_wp_version" value="6.6"/>
+
+    <!-- Allow short array syntax (PHP 8.1+) -->
+    <rule ref="Universal.Arrays.DisallowShortArraySyntax">
+        <severity>0</severity>
+    </rule>
+</ruleset>
