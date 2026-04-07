@@ -1,0 +1,4 @@
+interface:
+  display_name: "WP Review"
+  short_description: "Review WordPress changes with security-first findings"
+  default_prompt: "Use $wp-review to review this WordPress change, rank the findings by severity, and separate WPCS issues from behavioral risks."

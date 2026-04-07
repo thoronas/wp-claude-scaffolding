@@ -1,31 +1,31 @@
 # Reference Material
 
-This directory is a legacy compatibility mirror for Claude-specific workflows.
-The canonical shared reference directory is now `docs/reference/`.
+This directory holds inspiration code, examples, API payloads, and reference material
+that AI coding tools can inspect during development but that never ships with the project.
 
 ## How to Use
 
-If you are migrating to Codex, prefer adding new material under `docs/reference/`
-instead. Keep this directory aligned only when Claude compatibility is still needed.
+`docs/reference/` is not meant to be bulk-loaded. Point the agent at the specific file
+or directory that matches the task.
 
-```
-"Look at .claude/reference/plugins/acf-settings-page.php for how ACF
+```text
+"Look at docs/reference/plugins/acf-settings-page.php for how ACF
 handles settings registration. Use that pattern for our settings page."
 ```
 
-```
-"Review the API response samples in .claude/reference/api-examples/
+```text
+"Review the API response samples in docs/reference/api-examples/
 and build our data models to match that structure."
 ```
 
-```
-"The design is in .claude/reference/screenshots/settings-mockup.png.
+```text
+"The design is in docs/reference/screenshots/settings-mockup.png.
 Build the admin page to match this layout."
 ```
 
 ## Directory Structure
 
-```
+```text
 reference/
 ├── plugins/          Code from other plugins worth emulating
 ├── themes/           Theme patterns, theme.json configs, template examples
@@ -37,14 +37,14 @@ reference/
 
 ## Naming Conventions
 
-```
+```text
 plugins/acf-settings-page.php           ✓ Clear
-plugins/file3.php                        ✗ Meaningless
+plugins/file3.php                       ✗ Meaningless
 api-examples/crm-contacts-response.json ✓ Clear
 screenshots/settings-page-mockup.png    ✓ Clear
 ```
 
 ## Git Behavior
 
-- `reference/` is committed (shared with team)
-- `reference/local/` is gitignored (personal scratchpad)
+- `docs/reference/` is committed (shared with team)
+- `docs/reference/local/` is gitignored (personal scratchpad)

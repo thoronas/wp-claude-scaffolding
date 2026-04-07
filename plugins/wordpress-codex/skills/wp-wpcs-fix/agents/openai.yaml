@@ -1,0 +1,4 @@
+interface:
+  display_name: "WP WPCS Fix"
+  short_description: "Run and fix WordPress Coding Standards issues"
+  default_prompt: "Use $wp-wpcs-fix to clean up PHPCS violations in this WordPress codebase without changing behavior."

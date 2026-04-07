@@ -1,0 +1,4 @@
+interface:
+  display_name: "WordPress Codex"
+  short_description: "Build, review, debug, and migrate WordPress code with Codex-native skills"
+  default_prompt: "Use WordPress Codex to implement, review, debug, or migrate a WordPress theme or plugin with clear package boundaries and WPCS guardrails."

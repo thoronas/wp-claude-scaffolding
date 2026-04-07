@@ -1,0 +1,41 @@
+{
+  "name": "wordpress-codex",
+  "version": "0.1.0",
+  "description": "Codex skills and guardrails for WordPress theme and plugin development.",
+  "author": {
+    "name": "Scaffold Maintainers",
+    "email": "noreply@example.com",
+    "url": "https://example.com"
+  },
+  "homepage": "https://example.com/wordpress-codex",
+  "repository": "https://example.com/wordpress-codex/repository",
+  "license": "MIT",
+  "keywords": [
+    "wordpress",
+    "php",
+    "codex",
+    "wpcs",
+    "gutenberg"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "WordPress Codex",
+    "shortDescription": "WordPress implementation, review, debug, and migration skills",
+    "longDescription": "Codex-native WordPress skills focused on package boundaries, security, WPCS compliance, Gutenberg workflows, and structured review output.",
+    "developerName": "Scaffold Maintainers",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://example.com/wordpress-codex",
+    "privacyPolicyURL": "https://example.com/privacy",
+    "termsOfServiceURL": "https://example.com/terms",
+    "defaultPrompt": [
+      "Use $wp-feature to add a WordPress feature with WPCS and security guardrails.",
+      "Use $wp-review to review this WordPress change for security, correctness, and maintainability.",
+      "Use $wp-debug to investigate this WordPress bug before proposing a fix."
+    ],
+    "brandColor": "#1D4ED8"
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "WP Migrate"
+  short_description: "Plan staged WordPress and PHP migrations"
+  default_prompt: "Use $wp-migrate to analyze this WordPress or PHP migration, inventory breaking changes, and implement the first safe rollout step."

@@ -1,8 +1,8 @@
 # Architectural Decision Log
 
-Record significant structural choices here. Claude reads this file to understand
-why the codebase is shaped the way it is, which prevents it from suggesting
-changes that undo deliberate decisions.
+Record significant structural choices here. AI coding agents use this file to
+understand why the codebase is shaped the way it is, which helps prevent
+suggestions that undo deliberate decisions.
 
 ## Format
 

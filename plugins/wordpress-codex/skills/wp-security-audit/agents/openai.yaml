@@ -1,0 +1,4 @@
+interface:
+  display_name: "WP Security Audit"
+  short_description: "Audit WordPress code for concrete security flaws"
+  default_prompt: "Use $wp-security-audit to review this WordPress change for sanitization, escaping, nonces, capability checks, SQL safety, and REST permission issues."

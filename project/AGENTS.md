@@ -1,9 +1,6 @@
 # [Project Name]
 
-> Legacy compatibility file. Prefer `AGENTS.md` as the primary instruction file
-> for Codex and keep the two documents aligned during migration.
-
-[One sentence: what this project is and who it's for.]
+This file is the primary instruction file for Codex and other agentic coding tools.
 
 ## Project Type
 
@@ -21,6 +18,7 @@ WordPress core, third-party plugins, and uploads are excluded.
 ## What's in This Repo
 
 ### Theme: `themes/[your-theme]/`
+
 - Block theme using `theme.json` for global styles and settings
 - `templates/` — block template files (HTML)
 - `parts/` — block template parts (header, footer, sidebar)
@@ -33,6 +31,7 @@ WordPress core, third-party plugins, and uploads are excluded.
 - `functions.php` — bootstrap file, keep it lean (autoload + hooks only)
 
 ### Plugin: `plugins/[your-plugin]/`
+
 - `[your-plugin].php` — plugin bootstrap file (header comment + autoload + hooks)
 - `src/` — PHP source (PSR-4 autoloaded via Composer)
   - `Admin/` — wp-admin screens, settings pages, metaboxes
@@ -41,13 +40,14 @@ WordPress core, third-party plugins, and uploads are excluded.
   - `Blocks/` — block registration and server-side render callbacks
   - `CLI/` — WP-CLI commands
   - `Services/` — business logic (no direct DB or WordPress API calls)
-  - `Repositories/` — data access layer ($wpdb, WP_Query, options, meta)
+  - `Repositories/` — data access layer (`$wpdb`, `WP_Query`, options, meta)
 - `assets/` — JS/CSS source files
 - `blocks/` — Gutenberg block source (each block in its own directory)
 - `templates/` — PHP template files (all output escaped)
 - `languages/` — translation files
 
 ### mu-plugins/ (if used)
+
 - Must-use plugins for site-critical functionality that cannot be deactivated
 
 ## Build & Test Commands
@@ -85,10 +85,10 @@ uses the Settings API, stores options in a single serialized array."
 
 ## Known Issues / Gotchas
 
-- [List specific things Claude should watch for in this project]
+- [List specific things an AI coding agent should watch for in this project]
 
 ## Reference
 
 - See `PROJECT-SPEC.md` for full feature spec and requirements
 - See `DECISIONS.md` for architectural decision log
-- See `docs/reference/` for inspiration code and examples
+- See `docs/reference/` for inspiration code, API examples, and mockups

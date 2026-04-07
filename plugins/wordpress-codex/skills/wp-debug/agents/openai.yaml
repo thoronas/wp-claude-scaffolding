@@ -1,0 +1,4 @@
+interface:
+  display_name: "WP Debug"
+  short_description: "Trace WordPress bugs to root cause before fixing"
+  default_prompt: "Use $wp-debug to investigate this WordPress bug, identify the root cause, apply a focused fix, and suggest a regression test."

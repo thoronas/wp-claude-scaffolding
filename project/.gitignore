@@ -28,9 +28,13 @@ wp-config.php
 # Claude Code — project-level config
 # .claude/settings.json is committed (shared permissions)
 # .claude/reference/ is committed (shared reference material)
-# skills/, agents/, rules/ are NOT present here — they live in ~/.claude/ (see Obsidian vault)
+# Legacy shared Claude assets do not live in this repo
 .claude/reference/local/
 .claude/settings.local.json
+
+# Vendor-neutral AI reference scratchpad
+docs/reference/local/*
+!docs/reference/local/.gitignore
 
 # Logs
 *.log

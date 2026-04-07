@@ -1,0 +1,4 @@
+interface:
+  display_name: "WP Feature"
+  short_description: "Build WordPress features with security and WPCS guardrails"
+  default_prompt: "Use $wp-feature to implement a WordPress feature in the correct package, with the right hooks, sanitization, escaping, and validation steps."

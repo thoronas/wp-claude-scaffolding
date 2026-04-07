@@ -1,0 +1,4 @@
+interface:
+  display_name: "WP Block"
+  short_description: "Build Gutenberg blocks for themes and plugins"
+  default_prompt: "Use $wp-block to create or extend a Gutenberg block with the right ownership, attributes, editor UX, and validation steps."

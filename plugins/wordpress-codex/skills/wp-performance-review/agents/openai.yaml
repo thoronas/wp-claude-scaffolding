@@ -1,0 +1,4 @@
+interface:
+  display_name: "WP Performance"
+  short_description: "Review WordPress code for runtime and query inefficiencies"
+  default_prompt: "Use $wp-performance-review to review this WordPress code for slow queries, cache misses, global asset loading, and other performance issues."

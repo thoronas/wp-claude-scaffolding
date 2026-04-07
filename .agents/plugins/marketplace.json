@@ -1,0 +1,20 @@
+{
+  "name": "wordpress-scaffold",
+  "interface": {
+    "displayName": "WordPress Scaffold"
+  },
+  "plugins": [
+    {
+      "name": "wordpress-codex",
+      "source": {
+        "source": "local",
+        "path": "./plugins/wordpress-codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
