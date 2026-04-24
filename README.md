@@ -42,7 +42,7 @@ Verify it worked:
 
 ```bash
 ls ~/.claude/skills/
-# should show: wp-block  wp-debug  wp-feature  wp-migrate  wp-review
+# should show: wp-block  wp-debug  wp-feature  wp-migrate  wp-review  wp-theme
 ```
 
 ### Step 2 — Project setup
@@ -110,6 +110,7 @@ Skills are invoked by typing the skill name when working with Claude Code. All s
 | `/wp-debug` | Investigate a bug or unexpected behavior |
 | `/wp-migrate` | Handle a WordPress upgrade, PHP version bump, or API deprecation |
 | `/wp-review` | Security and WPCS code review before merging |
+| `/wp-theme` | Generate a full theme skeleton — FSE or hybrid — from scratch |
 
 ## Agents Reference
 
