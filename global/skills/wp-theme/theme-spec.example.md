@@ -34,6 +34,7 @@ php-templates: single, archive
 
 ## Colors
 # Omit to leave color palette empty (recommended — add directly in theme.json once confirmed)
+# These populate theme.json's color.palette array (slug = key, color = value)
 # primary: "#000000"
 # secondary: "#ffffff"
 # accent: "#0055B3"
@@ -47,6 +48,7 @@ php-templates: single, archive
 
 ## Layout
 # Omit to leave blank (set once design specs are confirmed)
+# Maps to theme.json layout.contentSize and layout.wideSize
 # content-size: "860px"
 # wide-size: "1200px"
 
@@ -70,5 +72,5 @@ php-templates: single, archive
 # woocommerce: false
 
 ## Notes
-# Free-form notes the skill should factor in during generation.
+# Free-form notes for the skill to consider during generation, or for developer reference only.
 # Example: "This theme targets WordPress 6.6+ only — use block bindings where appropriate."
