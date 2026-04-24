@@ -37,6 +37,8 @@ Explicit pointer + notes takes priority over explicit pointer alone, which takes
 
 Use `{theme-name}`, `{text-domain}`, and `{version}` as placeholders for the values gathered in Step 2. Theme folder slug is the text domain value.
 
+Place all generated files under `themes/{text-domain}/` in the project root unless the project's `CLAUDE.md` specifies a different theme directory.
+
 ### Common base (always generated)
 
 **`style.css`**
@@ -73,12 +75,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once get_template_directory() . '/inc/setup.php';
 require_once get_template_directory() . '/inc/enqueue.php';
 require_once get_template_directory() . '/inc/blocks.php';
-```
-
-For **hybrid mode**, also add after the requires:
-
-```php
-add_action( 'wp_head', 'wp_enqueue_scripts' );
 ```
 
 **`inc/setup.php`**
@@ -192,10 +188,12 @@ function {text_domain}_register_blocks(): void {
 	},
 	"textdomain": "{text-domain}",
 	"editorScript": "file:./index.js",
-	"style": "file:./style.scss",
-	"editorStyle": "file:./editor.scss"
+	"style": "file:./build/style-index.css",
+	"editorStyle": "file:./build/index.css"
 }
 ```
+
+Note: `file:` references point to compiled CSS output. Run your build step (e.g., `npm run build`) to produce `build/style-index.css` and `build/index.css` before activating the block.
 
 **`blocks/example-block/edit.js`**
 ```js
@@ -238,18 +236,18 @@ registerBlockType( metadata.name, { edit: Edit, save: Save } );
 **`blocks/example-block/style.scss`**
 ```scss
 // Frontend styles for example-block
-.wp-block-{text-domain-underscored}-example-block {
+.wp-block-{text-domain}-example-block {
 }
 ```
 
 **`blocks/example-block/editor.scss`**
 ```scss
 // Editor-only styles for example-block
-.wp-block-{text-domain-underscored}-example-block {
+.wp-block-{text-domain}-example-block {
 }
 ```
 
-Note: `{text-domain-underscored}` replaces hyphens with underscores in the CSS class (e.g., `ubc_events_theme`).
+Note: WordPress generates block CSS class names using hyphens throughout. The class for `ubc-events-theme/example-block` is `.wp-block-ubc-events-theme-example-block`. Use `{text-domain}` (with hyphens) in SCSS selectors. The `{text_domain}` underscore form is for PHP function names only.
 
 Create empty directories with `.gitkeep`:
 - `patterns/.gitkeep`
@@ -364,21 +362,21 @@ Create empty directories with `.gitkeep`:
 **`parts/header.html`**
 ```html
 <!-- wp:group {"tagName":"header","className":"site-header","layout":{"type":"flex","justifyContent":"space-between"}} -->
-<header class="wp-block-group site-header">
+<div class="wp-block-group site-header">
 	<!-- wp:site-title /-->
 	<!-- wp:navigation /-->
-</header>
+</div>
 <!-- /wp:group -->
 ```
 
 **`parts/footer.html`**
 ```html
 <!-- wp:group {"tagName":"footer","className":"site-footer","layout":{"type":"constrained"}} -->
-<footer class="wp-block-group site-footer">
+<div class="wp-block-group site-footer">
 	<!-- wp:paragraph {"align":"center"} -->
 	<p class="has-text-align-center">&#169; <!-- wp:site-title /--></p>
 	<!-- /wp:paragraph -->
-</footer>
+</div>
 <!-- /wp:group -->
 ```
 
@@ -405,7 +403,7 @@ Generate PHP files only for parts/templates the user designated as PHP. Generate
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 <header class="site-header">
-	<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php bloginfo( 'name' ); ?></a>
+	<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></a>
 	<?php
 	wp_nav_menu(
 		array(
@@ -555,4 +553,5 @@ List every generated file. Then remind the user:
 - `theme.json` `layout.contentSize` and `layout.wideSize` are intentionally blank — set once design specs are known
 - Color palette is empty — add brand colors to `theme-spec.md` or directly in `theme.json`
 - Rename `blocks/example-block/` to a real block name before building on it
+- Update `inc/blocks.php` when renaming the example block — `register_block_type()` must point to the new directory name
 - Hybrid mode: PHP header/footer require `wp_head()` and `wp_footer()` — verify these are present before testing
