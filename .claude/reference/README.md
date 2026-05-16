@@ -49,3 +49,5 @@ screenshots/settings-page-mockup.png    ✓ Clear
 
 - `reference/` is committed (shared with team)
 - `reference/local/` is gitignored (personal scratchpad)
+
+Reference repos dropped here often carry `.git` folders — strip them before committing: `rm -rf .claude/reference/your-repo/.git`. If you need the reference to stay updatable, use a git submodule instead. The `.gitignore` blocks nested `.git` dirs as a safety net, but the strip step is still required for a clean clone.
