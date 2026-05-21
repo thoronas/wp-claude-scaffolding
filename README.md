@@ -45,7 +45,7 @@ Claude layer, .gitignore setup, placeholder substitution, and optionally
 generating a full theme skeleton.
 
 ```bash
-git clone https://github.com/your-org/wp-scaffold-project.git
+git clone https://github.com/thoronas/wp-claude-scaffolding.git
 cd wp-scaffold-project
 bin/init.sh
 ```
