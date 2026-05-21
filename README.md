@@ -142,7 +142,7 @@ All skills are installed globally via wp-scaffold-global and work in every proje
 
 | Skill | When to use |
 | ----- | ----------- |
-| `/wp-feature` | Add a feature, settings page, post type, REST endpoint, or new functionality |
+| `/wp-feature` | Add a feature, settings page, post type, REST endpoint, or new functionality — includes a triage phase that identifies and routes to relevant extended skills |
 | `/wp-block` | Create a Gutenberg block from scratch |
 | `/wp-debug` | Investigate a bug or unexpected behavior |
 | `/wp-migrate` | Handle a WordPress upgrade, PHP version bump, or API deprecation |
