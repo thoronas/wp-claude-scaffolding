@@ -5,7 +5,7 @@ Drop the Claude layer into any WordPress repo structure, or use fresh build mode
 to scaffold a full project in one command.
 
 For the machine-level Claude configuration (skills, agents, rules), see
-[wp-scaffold-global](https://github.com/your-org/wp-scaffold-global).
+[wp-scaffold-global](https://github.com/thoronas/wp-scaffold-global).
 
 ---
 
@@ -20,7 +20,7 @@ For the machine-level Claude configuration (skills, agents, rules), see
 
 ## Step 1 — Global install (once per machine)
 
-Clone [wp-scaffold-global](https://github.com/your-org/wp-scaffold-global) and run:
+Clone [wp-scaffold-global](https://github.com/thoronas/wp-scaffold-global) and run:
 
 ```bash
 ./install.sh
