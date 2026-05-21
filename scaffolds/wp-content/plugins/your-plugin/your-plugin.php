@@ -4,7 +4,7 @@
  * Plugin URI:  https://example.com
  * Description: A custom plugin.
  * Version:     1.0.0
- * Requires at least: 6.6
+ * Requires at least: 6.9
  * Requires PHP: 8.1
  * Author:      Your Name
  * Author URI:  https://example.com

@@ -10,7 +10,7 @@ WordPress core, third-party plugins, and uploads are excluded.
 
 ## Stack
 
-- PHP 8.1+ / WordPress 6.6+
+- PHP 8.1+ / WordPress 6.9+
 - Block theme with `theme.json` + classic PHP fallbacks where needed
 - Custom plugin(s) with Composer PSR-4 autoloading
 - [Any additional: REST API, WP-CLI commands, custom tables, etc.]
