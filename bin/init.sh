@@ -140,11 +140,57 @@ CLAUDE_LAYER=(
   "phpunit.xml.dist"
 )
 
+# In dropin mode, warn if .claude already exists to prevent silent overwrites
+if [[ "$MODE" == "dropin" && -d "$TARGET/.claude" ]]; then
+    echo ""
+    echo "WARNING: $TARGET/.claude already exists."
+    echo "Existing files will be overwritten. Your customisations in"
+    echo "settings.json or commands/ may be lost."
+    echo ""
+    read -rp "Continue and overwrite? [y/N]: " _overwrite
+    if [[ ! "$_overwrite" =~ ^[Yy]$ ]]; then
+        echo "Aborted. Back up $TARGET/.claude first, then re-run."
+        exit 1
+    fi
+fi
+
+# In dropin mode, back up an existing CLAUDE.md rather than silently overwriting
+if [[ "$MODE" == "dropin" && -f "$TARGET/CLAUDE.md" ]]; then
+    BACKUP="$TARGET/CLAUDE.md.bak-$(date +%Y%m%d%H%M%S)"
+    cp "$TARGET/CLAUDE.md" "$BACKUP"
+    echo ""
+    echo "NOTE: Existing CLAUDE.md backed up to $(basename "$BACKUP")"
+    echo "      Review it after bootstrap to merge any project-specific content."
+    echo ""
+fi
+
 echo "Copying Claude layer..."
 for item in "${CLAUDE_LAYER[@]}"; do
   cp -r "$REPO_ROOT/$item" "$TARGET/"
   echo "  ✓ $item"
 done
+
+# Ensure .claude subdirectories exist regardless of scaffold source state.
+# Git does not track empty directories — these must be created explicitly.
+mkdir -p "$TARGET/.claude/reference"
+mkdir -p "$TARGET/.claude/commands"
+
+# Copy reference README if it exists in source
+if [[ -f "$REPO_ROOT/.claude/reference/README.md" ]]; then
+    cp "$REPO_ROOT/.claude/reference/README.md" "$TARGET/.claude/reference/"
+    echo " ✓ .claude/reference/ (with README)"
+else
+    echo " ✓ .claude/reference/ (created, empty — add inspiration code here)"
+fi
+
+# Copy any committed custom commands
+if [[ -d "$REPO_ROOT/.claude/commands" ]] && \
+   [[ -n "$(ls -A "$REPO_ROOT/.claude/commands" 2>/dev/null)" ]]; then
+    cp "$REPO_ROOT/.claude/commands/"* "$TARGET/.claude/commands/" 2>/dev/null || true
+    echo " ✓ .claude/commands/ (with scaffold commands)"
+else
+    echo " ✓ .claude/commands/ (created, empty — add custom slash commands here)"
+fi
 
 # docs/ — copy only the project-facing file, not scaffold dev artifacts
 mkdir -p "$TARGET/docs"
@@ -242,6 +288,14 @@ for f in "${SUBST_FILES[@]}"; do
   echo "  ✓ $(basename "$f")"
 done
 
+# Patch settings.json permission globs with actual theme and plugin slugs
+SETTINGS="$TARGET/.claude/settings.json"
+if [[ -f "$SETTINGS" ]]; then
+    sedi "s|themes/your-theme|themes/$THEME_SLUG|g" "$SETTINGS"
+    sedi "s|plugins/your-plugin|plugins/$PLUGIN_SLUG|g" "$SETTINGS"
+    echo "  ✓ .claude/settings.json (permission globs updated)"
+fi
+
 # ── Post-substitution verification ────────────────────────────────────────────
 
 echo ""
@@ -278,11 +332,47 @@ if [[ "$MODE" == "dropin" ]]; then
   echo "  2. Review and fill in PROJECT-SPEC.md"
   echo "  3. Review .claude/settings.json — update permission globs to match your repo structure"
   echo "  4. Run composer install"
+  echo "  5. Open DECISIONS.md and document the key architectural decisions already"
+  echo "     present in this project (data layer, auth approach, hook patterns, etc.)"
+  echo "     Claude will read this file — a blank file means no historical context."
 else
   echo "  1. Review and fill in CLAUDE.md (project name, focus, known issues)"
   echo "  2. Review and fill in PROJECT-SPEC.md"
   echo "  3. Run composer install"
   echo "  4. Run: npx wp-env start"
+fi
+
+# ── Optional triage (dropin mode only) ────────────────────────────────────────
+if [[ "$MODE" == "dropin" ]]; then
+    echo ""
+    echo "Project triage (recommended for existing projects):"
+    echo "  The wp-project-triage skill inspects your codebase and produces a"
+    echo "  diagnostic report. Claude can use this to pre-fill your CLAUDE.md"
+    echo "  and identify gaps before you start development work."
+    echo ""
+    read -rp "Run wp-project-triage now to analyse the existing project? [Y/n]: " _run_triage
+
+    if [[ ! "$_run_triage" =~ ^[Nn]$ ]]; then
+        echo ""
+        echo "Launching Claude Code to triage the existing project..."
+        echo "(Running: claude in $TARGET)"
+        echo ""
+        cd "$TARGET"
+        claude --dangerously-skip-permissions \
+            "Run the wp-project-triage skill on this repository. \
+            After the triage report is complete: \
+            1. Use the findings to fill in the project name, description, \
+               and 'What's in This Repo' section of CLAUDE.md. \
+            2. Document any architectural patterns you observe \
+               (data layer approach, hook conventions, namespace structure, \
+               theme/plugin boundary decisions) in DECISIONS.md. \
+            3. List any gaps, inconsistencies, or risks you find in the \
+               'Known Issues / Gotchas' section of CLAUDE.md. \
+            4. Report what you filled in and what still needs manual input."
+    else
+        echo ""
+        echo "Skipped. To run triage later, open Claude Code in $TARGET and run /wp-project-triage"
+    fi
 fi
 
 # ── wp-theme invocation (fresh mode only) ─────────────────────────────────────
