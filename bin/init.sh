@@ -26,22 +26,25 @@ PLUGIN_SLUG=""
 VENDOR=""
 NAMESPACE=""
 NO_THEME=false
+VAULT_PATH=""
 
 # ── Arg parsing ───────────────────────────────────────────────────────────────
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --mode)      MODE="$2";        shift 2 ;;
-    --target)    TARGET="$2";      shift 2 ;;
-    --theme)     THEME_SLUG="$2";  shift 2 ;;
-    --plugin)    PLUGIN_SLUG="$2"; shift 2 ;;
-    --vendor)    VENDOR="$2";      shift 2 ;;
-    --namespace) NAMESPACE="$2";   shift 2 ;;
-    --no-theme)  NO_THEME=true;    shift   ;;
+    --mode)        MODE="$2";        shift 2 ;;
+    --target)      TARGET="$2";      shift 2 ;;
+    --theme)       THEME_SLUG="$2";  shift 2 ;;
+    --plugin)      PLUGIN_SLUG="$2"; shift 2 ;;
+    --vendor)      VENDOR="$2";      shift 2 ;;
+    --namespace)   NAMESPACE="$2";   shift 2 ;;
+    --no-theme)    NO_THEME=true;    shift   ;;
+    --vault-path)  VAULT_PATH="$2";  shift 2 ;;
     *)
       echo "Unknown flag: $1"
       echo "Usage: $0 [--mode dropin|fresh] [--target PATH] [--theme SLUG]"
       echo "          [--plugin SLUG] [--vendor NAME] [--namespace NAME] [--no-theme]"
+      echo "          [--vault-path PATH]"
       exit 1
       ;;
   esac
@@ -83,8 +86,15 @@ prompt_value PLUGIN_SLUG "Plugin slug (e.g. clf8-plugin):"
 prompt_value VENDOR      "Composer vendor name (e.g. acme):"
 prompt_value NAMESPACE   "PHP namespace prefix (e.g. AcmeCorp):"
 
-# Expand ~ in TARGET
+# Vault path is fully optional — prompt only if flag was not passed
+if [[ -z "$VAULT_PATH" ]]; then
+  read -rp "Obsidian vault path (leave blank to skip): " _vault_input
+  VAULT_PATH="$_vault_input"
+fi
+
+# Expand ~ in TARGET and VAULT_PATH
 TARGET="${TARGET/#\~/$HOME}"
+VAULT_PATH="${VAULT_PATH/#\~/$HOME}"
 
 # Ask about theme generation only in fresh mode when not already suppressed
 if [[ "$MODE" == "fresh" && "$NO_THEME" == false ]]; then
@@ -320,6 +330,57 @@ else
   echo "  ✓ No remaining placeholders found."
 fi
 
+# ── Optional vault integration ────────────────────────────────────────────────
+
+VAULT_WIRED=false
+
+if [[ -n "$VAULT_PATH" ]]; then
+  if [[ ! -d "$VAULT_PATH" ]]; then
+    echo ""
+    echo "WARNING: Vault path '$VAULT_PATH' not found — skipping vault integration."
+    echo "         Run bin/retrofit-vault.sh once the vault is accessible."
+  else
+    VAULT_RESOLVED="$(cd "$VAULT_PATH" && pwd)"
+    VAULT_BRIEF_PATH="$VAULT_RESOLVED/projects/$PLUGIN_SLUG/$PLUGIN_SLUG-brief.md"
+
+    POINTER_FILE="$TARGET/.claude/reference/vault-brief-pointer.md"
+    cat > "$POINTER_FILE" <<EOF
+# Vault Brief Pointer
+
+Project slug: $PLUGIN_SLUG
+Vault brief: $VAULT_BRIEF_PATH
+
+## Session start instruction
+
+At the start of every session, before writing any code, read the vault brief at:
+
+  $VAULT_BRIEF_PATH
+
+This file contains cross-project context, active initiatives, and decisions that span
+multiple repositories. Copy or open the path above in Obsidian to view or edit it.
+EOF
+    echo "  ✓ .claude/reference/vault-brief-pointer.md"
+
+    CLAUDE_MD="$TARGET/CLAUDE.md"
+    SECTION_HEADER="## Cross-Project Context"
+    if ! grep -qF "$SECTION_HEADER" "$CLAUDE_MD" 2>/dev/null; then
+      printf '\n%s\n\nSee `.claude/reference/vault-brief-pointer.md` for the Obsidian vault brief\npath and session-start instruction.\n' \
+        "$SECTION_HEADER" >> "$CLAUDE_MD"
+      echo "  ✓ CLAUDE.md (appended Cross-Project Context section)"
+    fi
+
+    GITIGNORE="$TARGET/.gitignore"
+    POINTER_ENTRY=".claude/reference/vault-brief-pointer.md"
+    if ! grep -qF "$POINTER_ENTRY" "$GITIGNORE" 2>/dev/null; then
+      printf '\n# Obsidian vault pointer — machine-local, not committed\n%s\n' \
+        "$POINTER_ENTRY" >> "$GITIGNORE"
+      echo "  ✓ .gitignore (added vault-brief-pointer.md entry)"
+    fi
+
+    VAULT_WIRED=true
+  fi
+fi
+
 # ── Completion summary ─────────────────────────────────────────────────────────
 
 echo ""
@@ -335,11 +396,19 @@ if [[ "$MODE" == "dropin" ]]; then
   echo "  5. Open DECISIONS.md and document the key architectural decisions already"
   echo "     present in this project (data layer, auth approach, hook patterns, etc.)"
   echo "     Claude will read this file — a blank file means no historical context."
+  if [[ "$VAULT_WIRED" == true ]]; then
+    echo "  6. Create the vault brief in Obsidian at:"
+    echo "     $VAULT_BRIEF_PATH"
+  fi
 else
   echo "  1. Review and fill in CLAUDE.md (project name, focus, known issues)"
   echo "  2. Review and fill in PROJECT-SPEC.md"
   echo "  3. Run composer install"
   echo "  4. Run: npx wp-env start"
+  if [[ "$VAULT_WIRED" == true ]]; then
+    echo "  5. Create the vault brief in Obsidian at:"
+    echo "     $VAULT_BRIEF_PATH"
+  fi
 fi
 
 # ── Optional triage (dropin mode only) ────────────────────────────────────────
