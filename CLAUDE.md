@@ -65,6 +65,7 @@ At the start of every session, before any work:
 2. Read `PROJECT-SPEC.md` for the relevant feature or task if one is active.
 3. Before any architectural decision, read `DECISIONS.md` — do not re-litigate settled decisions.
 4. State your understanding of the active task in one sentence. Wait for confirmation before writing any code.
+5. For any feature implementation session, invoke `/requesting-code-review` before marking the task complete.
 
 If the task matches a category in `docs/DEVELOPMENT-PROMPTS.md` (feature build, bug investigation, code review, performance work, migration, block build, etc.), apply the required output structure from that prompt even if the developer has not used the full template.
 
@@ -119,9 +120,6 @@ If the task matches a category in `docs/DEVELOPMENT-PROMPTS.md` (feature build, 
 
 ## Output Standards
 
-**Always produce complete files, not diffs or fragments.**
-When modifying an existing file, show the complete modified file. Mark added sections with an inline comment. Never show partial files with "rest of file unchanged."
-
 **Self-verify before presenting any WordPress implementation.**
 Before presenting output, confirm:
 - [ ] All user input is sanitized on input (`sanitize_*`, `absint`, `wp_kses`)
@@ -170,3 +168,9 @@ uses the Settings API, stores options in a single serialized array."
 - See `DECISIONS.md` for architectural decision log — read before any architectural work; update after any architectural decision
 - See `docs/DEVELOPMENT-PROMPTS.md` for structured prompt templates covering features, bugs, reviews, performance, migrations, blocks, and more — apply the required output structure from the matching prompt type even on ad-hoc requests
 - See `.claude/reference/` for inspiration code and examples
+- To assess and brainstorm workflow improvements, run `/workflow-improvement`. Claude will apply the Compound Engineering / Loop Engineering framework across five lenses and propose the highest-leverage next change.
+- See Obsidian Vault (`/Users/flynnoconnor/Documents/Obsidian Vault/wiki/`) for authoritative reference on tooling and process:
+  - **Session start:** `workflows/WordPress Project Routing` classifies the repo type and routes to the correct skill — consult before any architectural work. `tools/WP Project Triage` is the mandatory triage checklist for all scaffold sessions.
+  - **Task-specific:** `workflows/WordPress Feature Development`, `workflows/WordPress Debugging`, and `workflows/WordPress Code Review` contain structured workflows — consult before starting work of that type.
+  - **Reference:** `topics/WPCS`, `topics/Gutenberg / Block Editor`, `topics/WordPress Performance`, `tools/WP-CLI and Ops`, and `tools/PHPStan for WordPress` for verified practice on those areas.
+  - **Meta-workflow:** `topics/Compound Engineering`, `topics/Loop Engineering`, and `topics/Context Infrastructure` — consult when assessing workflow or planning a new session structure.

@@ -94,7 +94,7 @@ fi
 
 # Resolve vault path as a literal string (not an env-var reference)
 VAULT_RESOLVED="$(cd "$OBSIDIAN_VAULT" && pwd)"
-VAULT_BRIEF_PATH="$VAULT_RESOLVED/projects/$PROJECT_SLUG/$PROJECT_SLUG-brief.md"
+VAULT_BRIEF_PATH="$VAULT_RESOLVED/wiki/synthesis/$PROJECT_SLUG-brief.md"
 
 echo ""
 echo "Vault integration summary:"

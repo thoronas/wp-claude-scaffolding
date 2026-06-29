@@ -341,7 +341,7 @@ if [[ -n "$VAULT_PATH" ]]; then
     echo "         Run bin/retrofit-vault.sh once the vault is accessible."
   else
     VAULT_RESOLVED="$(cd "$VAULT_PATH" && pwd)"
-    VAULT_BRIEF_PATH="$VAULT_RESOLVED/projects/$PLUGIN_SLUG/$PLUGIN_SLUG-brief.md"
+    VAULT_BRIEF_PATH="$VAULT_RESOLVED/wiki/synthesis/$PLUGIN_SLUG-brief.md"
 
     POINTER_FILE="$TARGET/.claude/reference/vault-brief-pointer.md"
     cat > "$POINTER_FILE" <<EOF
