@@ -69,6 +69,8 @@ At the start of every session, before any work:
 
 If the task matches a category in `docs/DEVELOPMENT-PROMPTS.md` (feature build, bug investigation, code review, performance work, migration, block build, etc.), apply the required output structure from that prompt even if the developer has not used the full template.
 
+For long-running tasks, the context window is automatically compacted as it approaches its limit. Do not stop work early or artificially wrap up due to token budget concerns. As you approach the context limit, write current state to `progress.txt` or a scratchpad file so work can resume cleanly after compaction.
+
 ## Conventions — These Are Non-Negotiable
 
 - WordPress Coding Standards (WordPress-Extra ruleset) — no exceptions
@@ -115,6 +117,20 @@ If the task matches a category in `docs/DEVELOPMENT-PROMPTS.md` (feature build, 
 **Architectural decisions must be visible.**
 - When making a structural choice (which layer handles this, why this hook, why this data store), state the decision and the reason before writing the code.
 - After any session where a new architectural decision was made, append it to `DECISIONS.md` with a one-sentence rationale. Do not wait to be asked.
+
+**Reversibility gate.**
+
+<reversibility_gate>
+Consider the reversibility and potential impact of every action before taking it.
+Take local, reversible actions freely (edit files, run tests, read code).
+For actions that are hard to reverse or affect shared systems, stop and confirm
+before proceeding:
+
+- Destructive: deleting files/branches, dropping tables, rm -rf
+- Hard to reverse: git push --force, git reset --hard, amending published commits
+- Visible to others: pushing code, commenting on issues, modifying shared infrastructure
+Do not use destructive actions to bypass obstacles — investigate the root cause instead.
+</reversibility_gate>
 
 ---
 
