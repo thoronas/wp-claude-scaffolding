@@ -87,32 +87,19 @@ For long-running tasks, the context window is automatically compacted as it appr
 - Theme templates: escape everything, no exceptions
 - Plugin code: service layer pattern — controllers are thin, logic is in services
 
-## Code Behaviour — These Are Also Non-Negotiable
+## Code Behaviour
 
-**Think before coding.**
-- State assumptions explicitly before implementing. If uncertain, ask.
+**WordPress judgment calls — make these visible.**
 - If a requirement has multiple valid WordPress approaches, name them and recommend one — don't pick silently.
 - If the task touches the theme/plugin boundary, state explicitly which side owns it and why before proceeding.
-- Push back when a simpler approach exists.
-
-**Simplicity within the established architecture.**
 - No abstractions beyond what the service/repository/controller pattern already in this project requires.
-- No features beyond what was asked.
-- No speculative error handling, flexibility, or configurability that wasn't requested.
-- If you write 200 lines and it could be 50, rewrite it.
 
-**Surgical changes only.**
-- Every changed line must trace directly to the request.
-- Do not improve adjacent code, hooks, filters, comments, or formatting.
-- Do not refactor code that isn't broken.
-- Match existing style, even if you would do it differently.
+**Out-of-scope findings.**
 - If you notice unrelated dead code or a security issue outside scope: name it explicitly and ask whether to address it now or log it to Known Issues. Do not silently fix or silently ignore it.
-- Remove only imports, variables, or functions that your changes made unused.
 
-**Define success criteria before coding.**
-- For any non-trivial task, state what done looks like before writing a line.
+**Success criteria before coding.**
 - Transform tasks into verifiable goals: "Add validation" → "tests for invalid inputs pass, phpcs clean, nonce and capability verified."
-- For multi-step tasks, produce a numbered plan with a verification step per stage before implementing anything. Implement one step at a time.
+- For multi-step tasks, produce a numbered plan with a verification step per stage. Implement one step at a time.
 
 **Architectural decisions must be visible.**
 - When making a structural choice (which layer handles this, why this hook, why this data store), state the decision and the reason before writing the code.
