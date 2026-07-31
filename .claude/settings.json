@@ -30,7 +30,10 @@
       "Bash(npx wp-env *)",
       "WebFetch(domain:github.com)",
       "Bash(git clone *)",
-      "Read(//Users/flynnoconnor/Documents/Obsidian Vault/wiki/tools/**)"
+      "Read(//Users/flynnoconnor/Documents/Obsidian Vault/wiki/tools/**)",
+      "Read(//Users/flynnoconnor/Documents/Obsidian Vault/wiki/workflows/**)",
+      "Read(//Users/flynnoconnor/Documents/Obsidian Vault/wiki/topics/**)",
+      "Read(//Users/flynnoconnor/Documents/Obsidian Vault/wiki/synthesis/**)"
     ],
     "deny": [
       "Read(.env)",
@@ -47,7 +50,9 @@
     "additionalDirectories": [
       "/Users/flynnoconnor/Documents/Obsidian Vault/wiki/workflows",
       "/Users/flynnoconnor/Sites/wp-scaffold-global",
-      "/Users/flynnoconnor/Documents/Obsidian Vault/wiki/tools"
+      "/Users/flynnoconnor/Documents/Obsidian Vault/wiki/tools",
+      "/Users/flynnoconnor/Documents/Obsidian Vault/wiki/topics",
+      "/Users/flynnoconnor/Documents/Obsidian Vault/wiki/synthesis"
     ]
   },
   "hooks": {
@@ -59,7 +64,7 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/phpcs-check.sh\"",
             "timeout": 60,
-            "statusMessage": "Running phpcbf + phpcs…"
+            "statusMessage": "Running phpcbf + phpcs\u2026"
           }
         ]
       }
