@@ -114,6 +114,29 @@ Pass `--no-theme` to skip theme generation and run it manually later.
 | `--vendor NAME` | Prompt | Composer vendor (e.g. `acme`) |
 | `--namespace NAME` | Prompt | PHP namespace prefix (e.g. `AcmeCorp`) |
 | `--no-theme` | Interactive Y/n | Skip wp-theme in fresh build |
+| `--yes`, `-y` | — | Never prompt; take the documented default for every confirmation |
+| `--force` | — | Allow overwriting an existing `.claude/` directory |
+| `--help`, `-h` | — | Usage summary |
+
+### Non-interactive use
+
+`init.sh` runs non-interactively when `--yes` is passed **or** stdin is not a TTY
+(piped, redirected, CI). In that state it never blocks on a prompt:
+
+- a missing required value is a hard error naming the flag to pass
+- optional confirmations take their documented default
+- overwriting an existing `.claude/` requires `--force` — that prompt is
+  deliberately not covered by `--yes`, since it can destroy local customisations
+- the interactive `claude` launches (`wp-project-triage`, `wp-theme`) are skipped,
+  because both need a TTY; the command to run later is printed instead
+
+```bash
+bin/init.sh --yes --mode dropin --target /path/to/repo --theme my-theme \
+            --plugin my-plugin --vendor acme --namespace AcmeCorp
+```
+
+Exit status is 0 on success and non-zero on real failure, so this is safe to gate
+a script or CI step on.
 
 ---
 

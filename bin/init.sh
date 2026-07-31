@@ -5,12 +5,27 @@
 #   dropin  — copy the Claude layer into an existing repo of any structure
 #   fresh   — copy Claude layer + wp-content scaffold, then invoke wp-theme
 #
-# Usage (fully non-interactive):
-#   bin/init.sh --mode dropin --target /path/to/repo --theme my-theme \
+# Usage (interactive — prompts for anything not passed):
+#   bin/init.sh
+#
+# Usage (fully non-interactive — every value supplied, no prompts):
+#   bin/init.sh --yes --mode dropin --target /path/to/repo --theme my-theme \
 #               --plugin my-plugin --vendor acme --namespace AcmeCorp
 #
-# Usage (interactive prompts for missing values):
-#   bin/init.sh
+# NON-INTERACTIVE BEHAVIOUR
+#   The script is non-interactive when --yes is passed OR stdin is not a TTY
+#   (piped, redirected from /dev/null, run from CI). In that state it never
+#   blocks on a prompt. Instead:
+#     - a missing required value is a hard error naming the flag to pass
+#     - optional confirmations take their documented default
+#     - overwriting an existing .claude/ requires --force
+#     - the interactive `claude` launches (wp-project-triage, wp-theme) are
+#       skipped, with the command to run later printed instead
+#
+#   Without this, `read` returns non-zero the moment stdin is closed and
+#   `set -e` kills the script with no output at all.
+#
+# Exit status is 0 on success. Anything else is a real failure.
 
 set -euo pipefail
 
@@ -27,6 +42,33 @@ VENDOR=""
 NAMESPACE=""
 NO_THEME=false
 VAULT_PATH=""
+ASSUME_YES=false
+FORCE=false
+
+usage() {
+  cat <<'USAGE'
+Usage: bin/init.sh [options]
+
+  --mode dropin|fresh   Bootstrap type
+  --target PATH         Target directory (must already exist)
+  --theme SLUG          Theme slug (e.g. my-theme)
+  --plugin SLUG         Plugin slug (e.g. my-plugin)
+  --vendor NAME         Composer vendor (e.g. acme)
+  --namespace NAME      PHP namespace prefix (e.g. AcmeCorp)
+  --vault-path PATH     Obsidian vault path (optional)
+  --no-theme            Skip the wp-theme skeleton in fresh mode
+  --yes, -y             Never prompt; take the documented default for every
+                        confirmation. Implied when stdin is not a TTY.
+  --force               Allow overwriting an existing .claude/ directory.
+                        Required for that specific case even with --yes,
+                        because it can destroy local customisations.
+  --help, -h            This message
+
+Non-interactive example:
+  bin/init.sh --yes --mode dropin --target /path/to/repo --theme my-theme \
+              --plugin my-plugin --vendor acme --namespace AcmeCorp
+USAGE
+}
 
 # ── Arg parsing ───────────────────────────────────────────────────────────────
 
@@ -40,29 +82,69 @@ while [[ $# -gt 0 ]]; do
     --namespace)   NAMESPACE="$2";   shift 2 ;;
     --no-theme)    NO_THEME=true;    shift   ;;
     --vault-path)  VAULT_PATH="$2";  shift 2 ;;
+    --yes|-y)      ASSUME_YES=true;  shift   ;;
+    --force)       FORCE=true;       shift   ;;
+    --help|-h)     usage; exit 0 ;;
     *)
-      echo "Unknown flag: $1"
-      echo "Usage: $0 [--mode dropin|fresh] [--target PATH] [--theme SLUG]"
-      echo "          [--plugin SLUG] [--vendor NAME] [--namespace NAME] [--no-theme]"
-      echo "          [--vault-path PATH]"
+      echo "Unknown flag: $1" >&2
+      echo "" >&2
+      usage >&2
       exit 1
       ;;
   esac
 done
 
-# ── Interactive prompts for missing values ─────────────────────────────────────
+# ── Interaction mode ──────────────────────────────────────────────────────────
+# Non-interactive when --yes is passed or stdin is not a TTY. Detecting the TTY
+# matters as much as the flag: piping or redirecting stdin used to make every
+# `read` return non-zero, which `set -e` turned into a silent exit 1.
 
-prompt_value() {
-  local _var="$1"
-  local _prompt="$2"
-  if [[ -z "${!_var}" ]]; then
-    read -rp "$_prompt " _val
-    eval "$_var=\"\$_val\""
+INTERACTIVE=true
+if [[ "$ASSUME_YES" == true ]] || [[ ! -t 0 ]]; then
+  INTERACTIVE=false
+fi
+
+# require_value <varname> <flag> <description>
+# In interactive mode, prompt. Otherwise fail loudly naming the missing flag.
+require_value() {
+  local _var="$1" _flag="$2" _desc="$3"
+  [[ -n "${!_var}" ]] && return 0
+
+  if [[ "$INTERACTIVE" == true ]]; then
+    local _val=""
+    read -rp "$_desc " _val
+    printf -v "$_var" '%s' "$_val"
+    [[ -n "${!_var}" ]] && return 0
   fi
+
+  echo "Error: missing required value — pass $_flag ($_desc)" >&2
+  [[ "$INTERACTIVE" == false ]] && \
+    echo "       Running non-interactively, so it cannot be prompted for." >&2
+  exit 1
+}
+
+# confirm <prompt> <default: y|n>
+# Returns 0 for yes. Non-interactive runs take the default without prompting.
+confirm() {
+  local _prompt="$1" _default="$2" _reply=""
+
+  if [[ "$INTERACTIVE" == false ]]; then
+    [[ "$_default" == "y" ]]
+    return
+  fi
+
+  read -rp "$_prompt " _reply || _reply=""
+  _reply="${_reply:-$_default}"
+  [[ "$_reply" =~ ^[Yy] ]]
 }
 
 # Mode selection
 if [[ -z "$MODE" ]]; then
+  if [[ "$INTERACTIVE" == false ]]; then
+    echo "Error: missing required value — pass --mode dropin|fresh" >&2
+    echo "       Running non-interactively, so it cannot be prompted for." >&2
+    exit 1
+  fi
   echo ""
   echo "What type of bootstrap?"
   echo "  [1] Drop into existing repo (Claude layer only)"
@@ -71,7 +153,7 @@ if [[ -z "$MODE" ]]; then
   case "$_mode_choice" in
     1) MODE="dropin" ;;
     2) MODE="fresh"  ;;
-    *) echo "Invalid choice. Expected 1 or 2."; exit 1 ;;
+    *) echo "Invalid choice. Expected 1 or 2." >&2; exit 1 ;;
   esac
 fi
 
@@ -80,15 +162,16 @@ if [[ "$MODE" != "dropin" && "$MODE" != "fresh" ]]; then
   exit 1
 fi
 
-prompt_value TARGET      "Target directory (absolute path):"
-prompt_value THEME_SLUG  "Theme slug (e.g. clf8):"
-prompt_value PLUGIN_SLUG "Plugin slug (e.g. clf8-plugin):"
-prompt_value VENDOR      "Composer vendor name (e.g. acme):"
-prompt_value NAMESPACE   "PHP namespace prefix (e.g. AcmeCorp):"
+require_value TARGET      "--target"    "Target directory (absolute path):"
+require_value THEME_SLUG  "--theme"     "Theme slug (e.g. clf8):"
+require_value PLUGIN_SLUG "--plugin"    "Plugin slug (e.g. clf8-plugin):"
+require_value VENDOR      "--vendor"    "Composer vendor name (e.g. acme):"
+require_value NAMESPACE   "--namespace" "PHP namespace prefix (e.g. AcmeCorp):"
 
-# Vault path is fully optional — prompt only if flag was not passed
-if [[ -z "$VAULT_PATH" ]]; then
-  read -rp "Obsidian vault path (leave blank to skip): " _vault_input
+# Vault path is fully optional — prompt only when interactive and not passed.
+# Non-interactive runs skip vault integration rather than failing.
+if [[ -z "$VAULT_PATH" && "$INTERACTIVE" == true ]]; then
+  read -rp "Obsidian vault path (leave blank to skip): " _vault_input || _vault_input=""
   VAULT_PATH="$_vault_input"
 fi
 
@@ -96,10 +179,14 @@ fi
 TARGET="${TARGET/#\~/$HOME}"
 VAULT_PATH="${VAULT_PATH/#\~/$HOME}"
 
-# Ask about theme generation only in fresh mode when not already suppressed
+# Ask about theme generation only in fresh mode when not already suppressed.
+# Non-interactive default is "no" — the theme step launches an interactive
+# Claude session, which cannot work without a TTY. Pass --no-theme to be
+# explicit, or run interactively to generate it.
 if [[ "$MODE" == "fresh" && "$NO_THEME" == false ]]; then
-  read -rp "Generate theme skeleton via wp-theme skill? [Y/n]: " _gen_theme
-  if [[ "$_gen_theme" =~ ^[Nn]$ ]]; then
+  if [[ "$INTERACTIVE" == true ]]; then
+    confirm "Generate theme skeleton via wp-theme skill? [Y/n]:" y || NO_THEME=true
+  else
     NO_THEME=true
   fi
 fi
@@ -127,8 +214,7 @@ echo "  Vendor:    $VENDOR"
 echo "  Namespace: $NAMESPACE"
 echo "  wp-theme:  $( [[ "$MODE" == "fresh" && "$NO_THEME" == false ]] && echo "yes" || echo "no" )"
 echo ""
-read -rp "Proceed? [Y/n]: " _confirm
-if [[ "$_confirm" =~ ^[Nn]$ ]]; then
+if ! confirm "Proceed? [Y/n]:" y; then
   echo "Aborted."
   exit 0
 fi
@@ -150,15 +236,22 @@ CLAUDE_LAYER=(
   "phpunit.xml.dist"
 )
 
-# In dropin mode, warn if .claude already exists to prevent silent overwrites
+# In dropin mode, warn if .claude already exists to prevent silent overwrites.
+# This one prompt is NOT covered by --yes: it can destroy local customisations,
+# so a non-interactive run must opt in explicitly with --force.
 if [[ "$MODE" == "dropin" && -d "$TARGET/.claude" ]]; then
     echo ""
     echo "WARNING: $TARGET/.claude already exists."
     echo "Existing files will be overwritten. Your customisations in"
     echo "settings.json or commands/ may be lost."
     echo ""
-    read -rp "Continue and overwrite? [y/N]: " _overwrite
-    if [[ ! "$_overwrite" =~ ^[Yy]$ ]]; then
+    if [[ "$FORCE" == true ]]; then
+        echo "Proceeding anyway (--force)."
+    elif [[ "$INTERACTIVE" == false ]]; then
+        echo "Refusing to overwrite in a non-interactive run." >&2
+        echo "Back up $TARGET/.claude, or re-run with --force to overwrite." >&2
+        exit 1
+    elif ! confirm "Continue and overwrite? [y/N]:" n; then
         echo "Aborted. Back up $TARGET/.claude first, then re-run."
         exit 1
     fi
@@ -445,9 +538,19 @@ if [[ "$MODE" == "dropin" ]]; then
     echo "  diagnostic report. Claude can use this to pre-fill your CLAUDE.md"
     echo "  and identify gaps before you start development work."
     echo ""
-    read -rp "Run wp-project-triage now to analyse the existing project? [Y/n]: " _run_triage
 
-    if [[ ! "$_run_triage" =~ ^[Nn]$ ]]; then
+    # Launching Claude is inherently interactive, so a non-interactive run always
+    # skips it regardless of --yes and prints the command to run later instead.
+    if [[ "$INTERACTIVE" == false ]]; then
+        _run_triage="n"
+        echo "Skipped — launching Claude needs a TTY and this is a non-interactive run."
+    elif confirm "Run wp-project-triage now to analyse the existing project? [Y/n]:" y; then
+        _run_triage="y"
+    else
+        _run_triage="n"
+    fi
+
+    if [[ "$_run_triage" == "y" ]]; then
         echo ""
         echo "Launching Claude Code to triage the existing project..."
         echo "(Running: claude in $TARGET)"
@@ -465,12 +568,13 @@ if [[ "$MODE" == "dropin" ]]; then
                'Known Issues / Gotchas' section of CLAUDE.md. \
             4. Report what you filled in and what still needs manual input."
     else
-        echo ""
-        echo "Skipped. To run triage later, open Claude Code in $TARGET and run /wp-project-triage"
+        echo "To run triage later, open Claude Code in $TARGET and run /wp-project-triage"
     fi
 fi
 
 # ── wp-theme invocation (fresh mode only) ─────────────────────────────────────
+# NO_THEME is already forced true on a non-interactive run, so this branch only
+# fires with a TTY available.
 
 if [[ "$MODE" == "fresh" && "$NO_THEME" == false ]]; then
   echo ""
@@ -486,6 +590,16 @@ Vendor: $VENDOR. \
 Namespace: $NAMESPACE."
 elif [[ "$MODE" == "fresh" && "$NO_THEME" == true ]]; then
   echo ""
-  echo "Theme skeleton skipped (--no-theme). When ready, open Claude Code in"
+  if [[ "$INTERACTIVE" == false ]]; then
+    echo "Theme skeleton skipped — launching Claude needs a TTY and this is a"
+    echo "non-interactive run. When ready, open Claude Code in"
+  else
+    echo "Theme skeleton skipped (--no-theme). When ready, open Claude Code in"
+  fi
   echo "$TARGET and run /wp-theme."
 fi
+
+# Explicit success. Without this the script exits with the status of the last
+# command evaluated — and in dropin mode that is the `if` above, which takes no
+# branch and returns 1. A completed bootstrap reported failure for months.
+exit 0

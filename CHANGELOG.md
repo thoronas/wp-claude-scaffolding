@@ -35,7 +35,44 @@ Released sections are immutable — never edit one after tagging.
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+
+- `bin/init.sh` gained `--yes`/`-y`, `--force`, and `--help`. `--yes` takes the
+  documented default for every confirmation. `--force` is required separately to
+  overwrite an existing `.claude/` directory — that prompt is deliberately **not**
+  covered by `--yes`, because it can destroy local customisations.
+
+### Fixed
+
+- **`bin/init.sh` exited 1 on success.** The final statement is the fresh-mode
+  `if/elif` for the wp-theme step. In dropin mode neither branch is taken, so the
+  compound returns 1, and with no explicit `exit 0` that became the script's exit
+  status. A completed bootstrap reported failure — nothing could script or gate on
+  it. Now ends with an explicit `exit 0`.
+
+- **The documented "fully non-interactive" invocation could not work.** The header
+  example omitted `--vault-path`, and there were seven unguarded `read` calls with
+  no way to bypass them. With stdin closed, `read` returns non-zero, `set -e` sees
+  it, and the script died **with no output at all** — the failure gave no clue what
+  had gone wrong.
+
+  `init.sh` now detects non-interactive execution — `--yes` passed, or stdin is not
+  a TTY — and never blocks on a prompt in that state:
+  - a missing required value is a hard error naming the flag to pass, instead of a
+    hang or a silent death
+  - optional confirmations take their documented default
+  - overwriting an existing `.claude/` requires `--force`
+  - the interactive `claude` launches (`wp-project-triage` in dropin mode, `wp-theme`
+    in fresh mode) are skipped, since both need a TTY, with the command to run later
+    printed instead
+
+- `prompt_value`'s `eval "$_var=\"\$_val\""` replaced with `printf -v`, removing a
+  shell-injection path through prompt input.
+
+### Changed
+
+- Unknown-flag and error output now goes to stderr rather than stdout, so a caller
+  redirecting stdout still sees failures.
 
 ---
 
@@ -69,24 +106,6 @@ Consolidates everything committed after the `v2.0.0` tag, which ran unreleased f
 
 - `VERSION` and this changelog.
 
-### Changed
-
-- `.claude/settings.json` — added the `hooks.PostToolUse` block. All existing
-  permission entries preserved.
-
-### Propagation notes for existing projects
-
-Both `clf-rebuild` and `ubc-transit` predate the stamp and will report as
-`unstamped`. To adopt this release in an existing project:
-
-```bash
-cp -r <template>/.claude/hooks <project>/.claude/
-# then merge the "hooks" block from the template's .claude/settings.json
-printf '{\n  "template_version": "2.1.0"\n}\n' > <project>/.claude/.scaffold-version
-```
-
-### Added — carried from the unreleased 2026-05-21 → 2026-07-25 work
-
 - Obsidian vault integration — `CLAUDE.md` routes session start through the vault's
   workflow and topic pages; `bin/retrofit-vault.sh` for existing projects.
 - Session protocol in `CLAUDE.md`: read Current Focus and Known Issues, read
@@ -101,6 +120,8 @@ printf '{\n  "template_version": "2.1.0"\n}\n' > <project>/.claude/.scaffold-ver
 
 ### Changed
 
+- `.claude/settings.json` — added the `hooks.PostToolUse` block. All existing
+  permission entries preserved.
 - WordPress baseline raised to 6.9; PHP 8.1+.
 - `CLAUDE.md` updated for Claude 5-generation models — trimmed 1,728 to 1,642 words
   by removing generic behaviour now handled by model judgement, keeping all
@@ -122,6 +143,17 @@ printf '{\n  "template_version": "2.1.0"\n}\n' > <project>/.claude/.scaffold-ver
 - Dropin mode: reference directories now created reliably, overwrite guards added
   for an existing `.claude/` and `CLAUDE.md` (the latter backed up rather than
   overwritten), settings globs corrected, project triage wired in.
+
+### Propagating this release to an existing project
+
+`clf-rebuild` and `ubc-transit` predate the version stamp and report as
+`unstamped`. To adopt 2.1.0 in either:
+
+```bash
+cp -r <template>/.claude/hooks <project>/.claude/
+# then merge the "hooks" block from the template's .claude/settings.json
+printf '{\n  "template_version": "2.1.0"\n}\n' > <project>/.claude/.scaffold-version
+```
 
 ---
 
