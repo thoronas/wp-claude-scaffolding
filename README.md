@@ -117,6 +117,44 @@ Pass `--no-theme` to skip theme generation and run it manually later.
 
 ---
 
+## Versioning and propagation
+
+`bin/init.sh` **copies** the Claude layer. Nothing syncs it again — a fix made here
+never reaches a project that was already bootstrapped. `VERSION` and
+[CHANGELOG.md](CHANGELOG.md) exist to make that gap measurable.
+
+Bump levels are defined by **what an already-bootstrapped project has to do**:
+
+| Bump | Action required in existing projects |
+| --- | --- |
+| **major** | Re-bootstrap, or migrate by hand per the changelog entry |
+| **minor** | Apply the entry to each project in `.sync-projects` |
+| **patch** | None — new projects only |
+
+Every bootstrap writes `.claude/.scaffold-version` into the project, recording the
+template version, the `wp-scaffold-global` version at the time, the date, and the
+mode. `bin/audit-drift.sh` in `wp-scaffold-global` reads that stamp and reports the
+lag:
+
+```text
+  template version: 2.1.0 (/Users/you/Sites/scaffolding)
+
+  ✓ clf-rebuild      conforms, on 2.1.0 — current
+  ⚠ ubc-transit      BEHIND: 2.0.0 → 2.1.0, see template CHANGELOG
+```
+
+Projects bootstrapped before versioning report as `unstamped (pre-versioning)` and
+are not counted as drift. To backfill one, write the version it actually came from:
+
+```bash
+printf '{\n  "template_version": "2.0.0"\n}\n' > <project>/.claude/.scaffold-version
+```
+
+This reports the gap; it does not close it. Applying the change is still manual —
+the changelog entry is the instruction list.
+
+---
+
 ## Reference: what .claude/reference/ is for
 
 `.claude/reference/` holds inspiration code, mockups, and API samples that

@@ -202,6 +202,32 @@ else
     echo " ✓ .claude/commands/ (created, empty — add custom slash commands here)"
 fi
 
+# ── Version stamp ─────────────────────────────────────────────────────────────
+# The Claude layer is COPIED, so template fixes never reach a project that was
+# already bootstrapped. This records what the project came from, which is what
+# makes that gap measurable: bin/audit-drift.sh in wp-scaffold-global compares
+# this stamp against the template's current VERSION and reports the lag.
+#
+# Kept out of CLAUDE_LAYER deliberately — it is generated per project, not copied.
+
+TEMPLATE_VERSION="unknown"
+[[ -f "$REPO_ROOT/VERSION" ]] && TEMPLATE_VERSION="$(tr -d '[:space:]' < "$REPO_ROOT/VERSION")"
+
+GLOBAL_VERSION="unknown"
+for _g in "${WP_SCAFFOLD_GLOBAL:-}" "$HOME/Sites/wp-scaffold-global"; do
+  [[ -n "$_g" && -f "$_g/VERSION" ]] && { GLOBAL_VERSION="$(tr -d '[:space:]' < "$_g/VERSION")"; break; }
+done
+
+cat > "$TARGET/.claude/.scaffold-version" <<EOF
+{
+  "template_version": "$TEMPLATE_VERSION",
+  "global_version_at_bootstrap": "$GLOBAL_VERSION",
+  "bootstrapped": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "mode": "$MODE"
+}
+EOF
+echo "  ✓ .claude/.scaffold-version (template $TEMPLATE_VERSION)"
+
 # docs/ — copy only the project-facing file, not scaffold dev artifacts
 mkdir -p "$TARGET/docs"
 cp "$REPO_ROOT/docs/DEVELOPMENT-PROMPTS.md" "$TARGET/docs/"

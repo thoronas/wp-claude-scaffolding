@@ -49,5 +49,20 @@
       "/Users/flynnoconnor/Sites/wp-scaffold-global",
       "/Users/flynnoconnor/Documents/Obsidian Vault/wiki/tools"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/phpcs-check.sh\"",
+            "timeout": 60,
+            "statusMessage": "Running phpcbf + phpcs…"
+          }
+        ]
+      }
+    ]
   }
 }
